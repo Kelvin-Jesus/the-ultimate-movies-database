@@ -1,9 +1,12 @@
 package main
 
 import (
-	"bufio"
+	"encoding/csv"
 	"fmt"
+	"io"
+	"log"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -12,19 +15,29 @@ func main() {
 		panic(err)
 	}
 
-	streamReader := bufio.NewReader(moviesFile)
-	streamBuffer := make([]byte, 1000)
+	csvReader := csv.NewReader(moviesFile)
 
 	for {
-		filePos, err := streamReader.Read(streamBuffer)
+		csvLine, err := csvReader.Read()
+		
 		if err != nil {
-			break
+			if err == io.EOF {
+				break
+			}
+			log.Fatalln(err)
 		}
 
-		// _ = filePos
-
-		// fmt.Println(filePos)
-		fmt.Println(string(streamBuffer[:filePos]))
-		break
+		movieId := csvLine[:1]
+		movieName := csvLine[1:2]
+		movieGenres := csvLine[2:]
+		fmt.Println(movieId, movieGenres, movieName)
+		fmt.Println(strings.Replace(queryInsertMovie(), "{MOVIE_ID}", movieId[0], -1))
+		fmt.Println(strings.Replace(queryInsertMovie(), "{MOVIE_NAME}", movieName[0], -1))
+		fmt.Println(strings.Replace(queryInsertMovie(), "{MOVIE_GENRES}", strings.Join(movieGenres, ","), -1))
+		// break
 	}
+}
+
+func queryInsertMovie() string {
+	return `INSERT INTO movies (movie_id, movie_name, movie_genres) VALUES ({MOVIE_ID}, {MOVIE_NAME}, {MOVIE_GENRES})`
 }

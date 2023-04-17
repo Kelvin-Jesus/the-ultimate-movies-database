@@ -11,3 +11,6 @@ lint:
 
 build:
 	go build -o bin/db-populate ./cmd/main.go
+
+run:
+	go run ./cmd/main.go
